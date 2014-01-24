@@ -235,8 +235,9 @@ export LIBPROCESS_IP="$1"
 (
   while true
   do
-    JAVA_OPTS="\${JAVA_OPTS[*]}" exec "$aurora_scheduler_home/bin/aurora-scheduler" \\
-      "\${AURORA_FLAGS[@]}"
+    JAVA_OPTS="\${JAVA_OPTS[*]}" exec \\
+              "$aurora_scheduler_home/bin/aurora-scheduler" \\
+              "\${AURORA_FLAGS[@]}"
   done
 ) &
 EOF
