@@ -145,7 +145,7 @@ function fetch_aurora {
 function install_aurora_slave {
   fetch_aurora
   sudo dd of=/usr/local/bin/thermos_observer.sh <<\EOF
-#!/bin/bash
+#!/usr/bin/env bash
 (
   while true
   do
@@ -160,14 +160,13 @@ function install_aurora_slave {
 ) & disown
 EOF
   sudo chmod +x /usr/local/bin/thermos_observer.sh
-  
+
   # TODO: Replace with public and versioned URLs.
-  sudo install -m 755 aurora/dist/gc_executor.pex /usr/local/bin/gc_executor
-  sudo install -m 755 aurora/dist/thermos_executor.pex /usr/local/bin/thermos_executor
-  sudo install -m 755 aurora/dist/thermos_observer.pex /usr/local/bin/thermos_observer
-  
+  for pex in gc_executor thermos_executor thermos_observer
+  do sudo install -m 755 aurora/dist/"$pex".pex /usr/local/bin/"$pex"
+  done
+
   sudo dd of=/etc/rc.local <<EOF
-#!/bin/sh -e
 /usr/local/bin/thermos_observer.sh >/var/log/thermos-observer.log 2>&1
 EOF
   sudo chmod +x /etc/rc.local
@@ -182,10 +181,10 @@ function install_aurora_master {
   sudo tar xvf aurora/dist/distributions/aurora-scheduler*.tar -C /usr/local
   sudo ln -nfs "$(ls -dt /usr/local/aurora-scheduler-* | head -1)" \
     "$aurora_scheduler_home"
-  
+
   sudo install -m 755 aurora/dist/aurora_client.pex /usr/local/bin/aurora
   sudo install -m 755 aurora/dist/aurora_admin.pex /usr/local/bin/aurora_admin
-  
+
   sudo dd of=/usr/local/sbin/aurora-scheduler.sh <<EOF
 #!/usr/bin/env bash
 
@@ -242,7 +241,7 @@ export LIBPROCESS_IP="$1"
 ) &
 EOF
   sudo chmod +x /usr/local/sbin/aurora-scheduler.sh
-  
+
   sudo mkdir -p /etc/aurora
   sudo dd of=/etc/aurora/clusters.json <<EOF
 [{
@@ -254,7 +253,6 @@ EOF
 EOF
 
   sudo dd of=/etc/rc.local <<EOF
-#!/bin/sh -e
 /usr/local/sbin/aurora-scheduler.sh \
   1> /var/log/aurora-scheduler-stdout.log \
   2> /var/log/aurora-scheduler-stderr.log
@@ -285,19 +283,18 @@ function build_aurora {
   msg "Building Aurora..."
   pushd aurora
     mkdir -p third_party
-    pushd third_party
+    ( cd third_party
       wget -c "http://downloads.mesosphere.io/master/ubuntu/13.04/mesos_${mesos_release}_amd64.egg" \
-        -O "mesos-${mesos_release}-py2.7-linux-x86_64.egg"
-    popd
-  
+           -O "mesos-${mesos_release}-py2.7-linux-x86_64.egg" )
+
     # build scheduler
     ./gradlew distTar
-  
+
     # build clients
     msg "Building Aurora clients"
     ./pants src/main/python/apache/aurora/client/bin:aurora_admin
     ./pants src/main/python/apache/aurora/client/bin:aurora_client
-  
+
     # fixup python build deps (currently hard-coded to 0.15.0-rc4)
     # this is required for the executors/observers to build
     sed -r --in-place \
