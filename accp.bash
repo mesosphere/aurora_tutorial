@@ -12,18 +12,16 @@ cat <<USAGE
 
   Cluster config input example:
 
-    # Master_External_IP Master_Internal_IP
-    184.73.87.68         10.77.14.94
+    # Mesos Master IP (external)   Mesos Master IP (internal)
+    54.168.1.10                    192.168.1.10
 
-    # Slave_External_IP
-    23.22.119.93
-    23.20.10.53
-    54.234.181.76
-    23.20.200.63
-    107.20.24.240
-
-  The masters and slaves should be separated by at least one blank line.
-  Leading and trailing blanks are okay. Comments are from '#' to end of line.
+    # Master and Slave sections must be seperated by a newline.
+    # Leading and trailing blanks are okay.
+    # Comments are from '#' to end-of-line.
+    # Mesos Slave IP's (external)
+    54.168.1.11
+    54.168.1.12
+    54.168.1.13
 
 USAGE
 }; function --help { -h ;}                 # A nice way to handle -h and --help
