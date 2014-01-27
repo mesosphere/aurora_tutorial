@@ -142,7 +142,7 @@ function fetch_aurora {
 
 function install_aurora_slave {
   fetch_aurora
-  sudo dd of=/usr/local/bin/thermos_observer.sh <<\EOF
+  sudo dd of=/usr/local/bin/thermos_observer.sh >/dev/null 2>&1 <<\EOF
 #!/usr/bin/env bash
 (
   while true
@@ -164,7 +164,7 @@ EOF
   do sudo install -m 755 aurora/dist/"$pex".pex /usr/local/bin/"$pex"
   done
 
-  sudo dd of=/etc/rc.local <<EOF
+  sudo dd of=/etc/rc.local >/dev/null 2>&1 <<EOF
 /usr/local/bin/thermos_observer.sh >/var/log/thermos-observer.log 2>&1
 EOF
   sudo chmod +x /etc/rc.local
@@ -183,7 +183,7 @@ function install_aurora_master {
   sudo install -m 755 aurora/dist/aurora_client.pex /usr/local/bin/aurora
   sudo install -m 755 aurora/dist/aurora_admin.pex /usr/local/bin/aurora_admin
 
-  sudo dd of=/usr/local/sbin/aurora-scheduler.sh <<EOF
+  sudo dd of=/usr/local/sbin/aurora-scheduler.sh >/dev/null 2>&1 <<EOF
 #!/usr/bin/env bash
 
 # Flags that control the behavior of the JVM.
@@ -242,7 +242,7 @@ EOF
   sudo chmod +x /usr/local/sbin/aurora-scheduler.sh
 
   sudo mkdir -p /etc/aurora
-  sudo dd of=/etc/aurora/clusters.json <<EOF
+  sudo dd of=/etc/aurora/clusters.json >/dev/null 2>&1 <<EOF
 [{
   "name": "example",
   "zk": "$1",
@@ -251,7 +251,7 @@ EOF
 }]
 EOF
 
-  sudo dd of=/etc/rc.local <<EOF
+  sudo dd of=/etc/rc.local >/dev/null 2>&1 <<EOF
 /usr/local/sbin/aurora-scheduler.sh \
   1> /var/log/aurora-scheduler-stdout.log \
   2> /var/log/aurora-scheduler-stderr.log
