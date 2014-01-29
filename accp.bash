@@ -2,15 +2,19 @@
 set -o errexit -o nounset -o pipefail
 function -h {
 cat <<USAGE
- Install Aurora on a Mesos cluster. Currently only supports a single Aurora
- Scheduler Master.
+  Install Aurora on a Mesos cluster. Currently only supports a single Aurora
+  Scheduler Master.
 
- USAGE: accp.bash < <cluster_config_file>
-        accp.bash master
-        accp.bash slave
-        accp.bash build
+  USAGE: accp.bash <ssh-options>? < <cluster_config_file>
+         accp.bash master
+         accp.bash slave
+         accp.bash build
 
-  Cluster config input example:
+  SSH OPTIONS:
+    --ssh-user <user_with_sudo_privs>
+    --ssh-key  <path_to_ssh_private_key>
+
+  CLUSTER CONFIG FILE:
 
     # Mesos Master IP (external)   Mesos Master IP (internal)
     54.168.1.10                    192.168.1.10
