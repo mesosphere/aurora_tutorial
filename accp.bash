@@ -223,7 +223,6 @@ AURORA_FLAGS=(
 # (libmesos).
 export GLOG_v=0
 export LIBPROCESS_PORT=8083
-export LIBPROCESS_IP="$1"
 
 JAVA_OPTS="\${JAVA_OPTS[*]}" exec \\
           "$aurora_scheduler_home/bin/aurora-scheduler" \\
