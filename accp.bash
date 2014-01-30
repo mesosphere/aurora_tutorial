@@ -146,33 +146,24 @@ function fetch_aurora {
 
 function install_aurora_slave {
   fetch_aurora
-  sudo dd of=/usr/local/bin/thermos_observer.sh >/dev/null 2>&1 <<\EOF
-#!/usr/bin/env bash
-(
-  while true
-  do
-    /usr/local/bin/thermos_observer \
-         --root=/var/run/thermos \
-         --port=1338 \
-         --log_to_disk=NONE \
-         --log_to_stderr=google:INFO
-    echo "Observer exited with $?, restarting."
-    sleep 10
-  done
-) & disown
-EOF
-  sudo chmod +x /usr/local/bin/thermos_observer.sh
 
   # TODO: Replace with public and versioned URLs.
   for pex in gc_executor thermos_executor thermos_observer
   do sudo install -m 755 aurora/dist/"$pex".pex /usr/local/bin/"$pex"
   done
 
-  sudo dd of=/etc/rc.local >/dev/null 2>&1 <<EOF
-/usr/local/bin/thermos_observer.sh >/var/log/thermos-observer.log 2>&1
+  sudo dd of=/etc/init/thermos-observer.conf > /dev/null 2>&1 <<EOF
+description "Aurora Thermos Observer"
+start on stopped rc RUNLEVEL=[2345]
+respawn
+exec /usr/local/bin/thermos_observer \
+  --root=/var/run/thermos \
+  --port=1338 \
+  --log_to_disk=NONE \
+  --log_to_stderr=google:INFO >> /var/log/thermos-observer.log 2>&1
+post-stop exec sleep 10
 EOF
-  sudo chmod +x /etc/rc.local
-  sudo /etc/rc.local
+  sudo service thermos-observer start
 }
 
 # Args are the Mesos master internal IP addresses
@@ -187,7 +178,7 @@ function install_aurora_master {
   sudo install -m 755 aurora/dist/aurora_client.pex /usr/local/bin/aurora
   sudo install -m 755 aurora/dist/aurora_admin.pex /usr/local/bin/aurora_admin
 
-  sudo dd of=/usr/local/sbin/aurora-scheduler.sh >/dev/null 2>&1 <<EOF
+  sudo dd of=/usr/local/sbin/aurora-scheduler.sh > /dev/null 2>&1 <<EOF
 #!/usr/bin/env bash
 
 # Flags that control the behavior of the JVM.
@@ -234,19 +225,14 @@ export GLOG_v=0
 export LIBPROCESS_PORT=8083
 export LIBPROCESS_IP="$1"
 
-(
-  while true
-  do
-    JAVA_OPTS="\${JAVA_OPTS[*]}" exec \\
-              "$aurora_scheduler_home/bin/aurora-scheduler" \\
-              "\${AURORA_FLAGS[@]}"
-  done
-) &
+JAVA_OPTS="\${JAVA_OPTS[*]}" exec \\
+          "$aurora_scheduler_home/bin/aurora-scheduler" \\
+          "\${AURORA_FLAGS[@]}"
 EOF
   sudo chmod +x /usr/local/sbin/aurora-scheduler.sh
 
   sudo mkdir -p /etc/aurora
-  sudo dd of=/etc/aurora/clusters.json >/dev/null 2>&1 <<EOF
+  sudo dd of=/etc/aurora/clusters.json > /dev/null 2>&1 <<EOF
 [{
   "name": "example",
   "zk": "$1",
@@ -255,13 +241,15 @@ EOF
 }]
 EOF
 
-  sudo dd of=/etc/rc.local >/dev/null 2>&1 <<EOF
-/usr/local/sbin/aurora-scheduler.sh \
-  1> /var/log/aurora-scheduler-stdout.log \
-  2> /var/log/aurora-scheduler-stderr.log
+  sudo dd of=/etc/init/aurora-scheduler.conf > /dev/null 2>&1 <<EOF
+description "Aurora Scheduler"
+start on stopped rc RUNLEVEL=[2345]
+respawn
+exec /usr/local/sbin/aurora-scheduler.sh \
+  1>> /var/log/aurora-scheduler-stdout.log \
+  2>> /var/log/aurora-scheduler-stderr.log
 EOF
-  sudo chmod +x /etc/rc.local
-  sudo /etc/rc.local
+  sudo service aurora-scheduler start
 }
 
 ######################################################## Aurora Build Utilities
