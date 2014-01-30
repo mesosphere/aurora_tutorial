@@ -152,7 +152,7 @@ function install_aurora_slave {
   do sudo install -m 755 aurora/dist/"$pex".pex /usr/local/bin/"$pex"
   done
 
-  sudo dd of=/etc/init/thermos-observer.conf > /dev/null 2>&1 <<EOF
+  sudo dd of=/etc/init/thermos-observer.conf &> /dev/null <<EOF
 description "Aurora Thermos Observer"
 start on stopped rc RUNLEVEL=[2345]
 respawn
@@ -178,7 +178,7 @@ function install_aurora_master {
   sudo install -m 755 aurora/dist/aurora_client.pex /usr/local/bin/aurora
   sudo install -m 755 aurora/dist/aurora_admin.pex /usr/local/bin/aurora_admin
 
-  sudo dd of=/usr/local/sbin/aurora-scheduler.sh > /dev/null 2>&1 <<EOF
+  sudo dd of=/usr/local/sbin/aurora-scheduler.sh &> /dev/null <<EOF
 #!/usr/bin/env bash
 
 # Flags that control the behavior of the JVM.
@@ -232,7 +232,7 @@ EOF
   sudo chmod +x /usr/local/sbin/aurora-scheduler.sh
 
   sudo mkdir -p /etc/aurora
-  sudo dd of=/etc/aurora/clusters.json > /dev/null 2>&1 <<EOF
+  sudo dd of=/etc/aurora/clusters.json &> /dev/null <<EOF
 [{
   "name": "example",
   "zk": "$1",
@@ -241,7 +241,7 @@ EOF
 }]
 EOF
 
-  sudo dd of=/etc/init/aurora-scheduler.conf > /dev/null 2>&1 <<EOF
+  sudo dd of=/etc/init/aurora-scheduler.conf &> /dev/null <<EOF
 description "Aurora Scheduler"
 start on stopped rc RUNLEVEL=[2345]
 respawn
@@ -258,7 +258,7 @@ function checkout_aurora {
   if [[ ! -d aurora ]]
   then
     msg "Checking out Aurora repo..."
-    git clone -q -b "$aurora_release" "$aurora_repo" aurora > /dev/null 2>&1
+    git clone -q -b "$aurora_release" "$aurora_repo" aurora &> /dev/null
   fi
 }
 
