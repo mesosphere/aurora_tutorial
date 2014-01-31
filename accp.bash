@@ -210,7 +210,7 @@ AURORA_FLAGS=(
   -native_log_zk_group_path=/aurora/replicated-log
 
   -native_log_file_path=/var/lib/aurora/db
-  -backup_dir="$aurora_scheduler_home/backups"
+  -backup_dir=/var/lib/aurora/backups
 
   -thermos_executor_path=/usr/local/bin/thermos_executor
   -gc_executor_path=/usr/local/bin/gc_executor
